@@ -6,7 +6,7 @@ const yaml = require('js-yaml')
 const fs = require('fs')
 const gitToken = process.env.GITHUB_TOKEN || console.error('No github token provided')
 const gitUrl = process.env.REPO_URL || console.error('No repo url provided')
-const rootTempDirectory = '.'
+const rootTempDirectory = '/tmp'
 const directory = path.join(rootTempDirectory, path.basename(gitUrl, '.git'))
 const branch = 'master'
 
