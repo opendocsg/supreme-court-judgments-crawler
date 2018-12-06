@@ -1,0 +1,12 @@
+{
+    "extends": "@opengovsg/eslint-config-opengovsg",
+    "rules": {
+        "indent": [
+            "error",
+            4
+        ],
+        "no-console": [
+            "off"
+        ]
+    }
+}
