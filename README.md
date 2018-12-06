@@ -3,4 +3,4 @@
 ### Env var to set
 - REPO_URL
 - RSS_URL
-- GITHUB_TOKEn
+- GITHUB_TOKEN
