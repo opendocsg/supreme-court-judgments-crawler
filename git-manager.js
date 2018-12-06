@@ -6,9 +6,9 @@ const yaml = require('js-yaml')
 const fs = require('fs')
 const gitToken = process.env.GITHUB_TOKEN || console.error('No github token provided')
 const gitUrl = process.env.REPO_URL || console.error('No repo url provided')
-const rootTempDirectory = '/tmp'
+const rootTempDirectory = '.'
 const directory = path.join(rootTempDirectory, path.basename(gitUrl, '.git'))
-const branch = 'master'
+const branch = process.env.GIT_BRANCH || 'master'
 
 let authUrl = URL.parse(gitUrl)
 authUrl.auth = gitToken + ':x-oauth-basic'

@@ -1,23 +1,7 @@
 language: node_js
-node_js: "8"
+node_js: "10"
 
 install: npm install --production
 
-script: echo "Deploying to lambda"
+script: npm start
 
-before_deploy: zip -r app.zip *.js node_modules/ 
-
-deploy:
-  provider: lambda
-  function_name: supreme-court-judgements-rss 
-  region: ap-southeast-1
-  runtime: nodejs8.10
-  zip: app.zip
-  timeout: 600
-  access_key_id: $AWS_ACCESS_KEY_ID
-  secret_access_key: $AWS_SECRET_ACCESS_KEY
-  role: $ROLE
-  handler_name: index.run
-  publish: true
-  on:
-    branch: master
