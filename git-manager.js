@@ -34,7 +34,7 @@ const gitCommitAndPush = async () => {
         console.log(status.files)
         await git.commit('Updated with new files')
         console.log('Git committed')
-        // await git.push('origin', branch)
+        await git.push('origin', branch)
         console.log('Git pushed')
     } catch (err) {
         console.error('Error with commiting new files:', err)
