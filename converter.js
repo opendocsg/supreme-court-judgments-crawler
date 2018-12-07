@@ -67,6 +67,9 @@ const getMarkdownFromUrl = async (url) => {
     // Remove non-utf-8 characters
     markdown = markdown.replace(/\uFFFD/g, '')
 
+    // Add source url at the bottom
+    markdown += `\n\n\nSource: [link](${url})`
+
     return markdown
 }
 
