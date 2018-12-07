@@ -21,7 +21,7 @@ const run = async () => {
         const markdown = await converter.getMarkdownFromUrl(item.link)
         // Trim everything after the last '-'
         const wlist = /[^A-Za-z0-9/\-()_+&\s]/g
-        let fileName = item.title.split('-').pop().trim()
+        let fileName = item.title.split('-').pop().trim().replace(/ /g, '_')
         fileName = fileName.replace(wlist, '') + '.md'
         const filePath = path.join(directory, fileName)
         if (fs.existsSync(filePath)) {
