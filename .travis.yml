@@ -1,6 +1,12 @@
 language: node_js
 node_js: "10"
 
+env: 
+  - RSS_URL=$RSS_URL
+  - GITHUB_TOKEN=$GITHUB_TOKEN
+  - REPO_URL=$REPO_URL
+  - GIT_BRANCH=$GIT_BRANCH
+
 install: npm install --production
 
 script: npm start
