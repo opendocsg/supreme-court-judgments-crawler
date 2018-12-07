@@ -53,4 +53,4 @@ const run = async () => {
     }
 }
 
-exports.module = { run }
+run()
