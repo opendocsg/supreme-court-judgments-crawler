@@ -20,7 +20,7 @@ const git = Git(directory)
 const gitClone = async () => {
     try {
         await git.clone(authUrl, rootTempDirectory, ['--branch', branch || 'master'])
-        console.log('Git cloned')
+        console.log('Git cloned', gitUrl)
     } catch (err) {
         console.error('Error with git clone:', err)
         throw err
