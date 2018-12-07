@@ -3,7 +3,6 @@ const path = require('path')
 const util = require('util')
 const fs = require('fs')
 const writeFilePromise = util.promisify(fs.writeFile)
-var sanitize = require('sanitize-filename')
 
 const converter = require('./converter')
 const gitManager = require('./git-manager')
@@ -21,7 +20,9 @@ const run = async () => {
     await Promise.all(feed.items.map(async (item) => {
         const markdown = await converter.getMarkdownFromUrl(item.link)
         // Trim everything after the last '-'
-        let fileName = sanitize(item.title.split('-').pop().trim()) + '.md'
+        const wlist = /[^A-Za-z0-9/\-()_+&\s]/g
+        let fileName = item.title.split('-').pop().trim()
+        fileName = fileName.replace(wlist, '') + '.md'
         const filePath = path.join(directory, fileName)
         if (fs.existsSync(filePath)) {
             return
