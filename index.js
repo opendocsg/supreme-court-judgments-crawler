@@ -3,6 +3,7 @@ const path = require('path')
 const util = require('util')
 const fs = require('fs')
 const writeFilePromise = util.promisify(fs.writeFile)
+const mkDirPromise = util.promisify(fs.mkDirPromise)
 
 const converter = require('./converter')
 const gitManager = require('./git-manager')
@@ -20,10 +21,13 @@ const run = async () => {
     await Promise.all(feed.items.map(async (item) => {
         const markdown = await converter.getMarkdownFromUrl(item.link)
         // Trim everything after the last '-'
-        const wlist = /[^A-Za-z0-9/\-()_+&\s]/g
-        let fileName = item.title.split('-').pop().trim().replace(/ /g, '_')
-        fileName = fileName.replace(wlist, '') + '.md'
-        const filePath = path.join(directory, fileName)
+        const blacklistChars = /[^A-Za-z0-9/\-()_+&@,\s]/g
+        const itemTitle = item.title.split('-')
+        let fileName = itemTitle.pop().trim().replace(/ /g, '_')
+        fileName = fileName.replace(blacklistChars, '') + '.md'
+        const directoryName = itemTitle.join('-').trim().replace(blacklistChars, '')
+        const directoryPath = path.join(directory, directoryName)
+        const filePath = path.join(directoryPath, fileName)
         if (fs.existsSync(filePath)) {
             return
         }
@@ -32,6 +36,7 @@ const run = async () => {
             date: new Date(item.pubDate),
         })
         try {
+            await mkDirPromise(directoryPath, { recursive: true })
             await writeFilePromise(filePath, markdown, { flag: 'w' })
             counter++
             console.log(`done ${counter} : ${item.title}`)
