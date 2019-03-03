@@ -1,5 +1,6 @@
 const got = require('got')
 const cheerio = require('cheerio')
+const yaml = require('js-yaml')
 const TurndownService = require('turndown')
 const turndownPluginGfm = require('turndown-plugin-gfm')
 const turndownService = new TurndownService({ headingStyle: 'atx' })
@@ -38,27 +39,46 @@ const getMarkdownFromUrl = async (url) => {
     let $ = cheerio.load(html)
     let content = $('.contentsOfFile').html()
     // fallbacks
-    if (!content.length) {
+    if (!content || !content.length) {
         content = $('content').html()
     }
-    if (!content.length) {
+    if (!content || !content.length) {
         content = $('maincontent').html()
     }
     $ = cheerio.load(content)
+
     // Remove javascript hyperlink
+    const caseId = $('.Citation').first().text().trim()
     $('[href^=javascript]').remove()
+
     // Remove colons from table
     $('.info-delim1').remove()
+
     // Set title as h1
     $('.title').get(0).tagName = 'h1'
+    const title = $('.title').first().text().trim()
+
     // Set this as h3, so it doesnt appear in toc
     $('.Judg-Author').map((i, el) => { el.tagName = 'h3' })
+
     // Remove date as table
-    const date = $('.Judg-Hearing-Date').text()
+    const date = $('.Judg-Hearing-Date').text().trim()
     let dateTable = $('.Judg-Hearing-Date').closest('table')
     if (dateTable.length > 0) {
         $('.Judg-Hearing-Date').closest('table').replaceWith(date)
     }
+
+    // Get tags
+    let tags = new Set()
+    $('#info-table').nextAll('p.txt-body').each((i, el) => {
+        const tagline = $(el).text()
+        // this is a special dash, dont replace
+        tagline.split('–').forEach((tag) => {
+            tags.add(tag.trim())
+        })
+    })
+    tags = Array.from(tags)
+
     // Set headers based on Judge-Heading-#
     replaceHeaderClassesWithTags($, 'Judg-Heading-')
 
@@ -70,7 +90,19 @@ const getMarkdownFromUrl = async (url) => {
     // Add source url at the bottom
     markdown += `\n\n\nSource: [link](${url})`
 
-    return markdown
+    let config = {
+        title,
+        subtitle: `${caseId} / Decision Date: ${date}`,
+        tags,
+    }
+
+    console.log(config)
+    config = '---\n' + yaml.safeDump(config) + '\n---\n'
+
+    return {
+        markdown,
+        config,
+    }
 }
 
 module.exports = {

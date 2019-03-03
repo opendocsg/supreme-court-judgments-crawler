@@ -3,6 +3,7 @@ const path = require('path')
 const util = require('util')
 const fs = require('fs')
 const writeFilePromise = util.promisify(fs.writeFile)
+const mkDirPromise = util.promisify(fs.mkdir)
 
 const converter = require('./converter')
 const gitManager = require('./git-manager')
@@ -10,6 +11,8 @@ const directory = gitManager.directory
 const parser = new Parser()
 
 const rssurl = process.env.RSS_URL || console.error('RSS_URL not provided')
+const fileName = 'report.md'
+const configFileName = 'index.md'
 
 const run = async () => {
     await gitManager.gitClone()
@@ -18,21 +21,26 @@ const run = async () => {
     let newFiles = []
     let erroredFiles = []
     await Promise.all(feed.items.map(async (item) => {
-        const markdown = await converter.getMarkdownFromUrl(item.link)
+        const { markdown, config }= await converter.getMarkdownFromUrl(item.link)
         // Trim everything after the last '-'
-        const wlist = /[^A-Za-z0-9/\-()_+&\s]/g
-        let fileName = item.title.split('-').pop().trim().replace(/ /g, '_')
-        fileName = fileName.replace(wlist, '') + '.md'
-        const filePath = path.join(directory, fileName)
+        const blacklistChars = /[^A-Za-z0-9-()_+&@,\s]/g
+        const itemTitle = item.title.split('-')
+        let directoryName = itemTitle.pop().trim().replace(/ /g, '_')
+        directoryName = directoryName.replace(blacklistChars, '') 
+        const directoryPath = path.join(directory, directoryName)
+        const filePath = path.join(directoryPath, fileName)
+        const configFilePath = path.join(directoryPath, configFileName)
         if (fs.existsSync(filePath)) {
             return
         }
         newFiles.push({
-            fileName,
+            directoryName,
             date: new Date(item.pubDate),
         })
         try {
+            await mkDirPromise(directoryPath, { recursive: true })
             await writeFilePromise(filePath, markdown, { flag: 'w' })
+            await writeFilePromise(configFilePath, config, { flag: 'w' })
             counter++
             console.log(`done ${counter} : ${item.title}`)
         } catch (err) {
