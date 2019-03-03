@@ -42,15 +42,19 @@ const gitCommitAndPush = async () => {
     }
 }
 
-const updateFileOrderInConfig = async (newFiles) => {
+const updateOrderInConfig = async (newDirectories) => {
     // Sort new file names in order of recency
-    const sortedFileNames = newFiles.sort((a, b) => {
+    const sortedDirectoryPaths = newDirectories.sort((a, b) => {
         return b.date - a.date
-    }).map(a => a.fileName)
+    }).map(a => a.directoryName)
     try {
         const configJson = yaml.safeLoad(fs.readFileSync(path.join(directory, '_config.yml'), 'utf8'))
-        const sectionOrder = configJson['section_order']
-        configJson['section_order'] = sortedFileNames.concat(sectionOrder)
+        let documentOrder = configJson['document_order']
+        if (!documentOrder) {
+            documentOrder = []
+        }
+        configJson['document_order'] = sortedDirectoryPaths.concat(documentOrder)
+        console.log(configJson)
         const configYaml = yaml.safeDump(configJson)
         fs.writeFileSync(path.join(directory, '_config.yml'), configYaml, 'utf8')
         console.log('_config.yml updated')
@@ -62,7 +66,7 @@ const updateFileOrderInConfig = async (newFiles) => {
 
 const updateGitRepoWithNewFiles = async (newFiles) => {
     try {
-        await updateFileOrderInConfig(newFiles)
+        await updateOrderInConfig(newFiles)
         await gitCommitAndPush()
     } catch (err) {
         throw err

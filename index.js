@@ -34,7 +34,7 @@ const run = async () => {
             return
         }
         newFiles.push({
-            directoryPath,
+            directoryName,
             date: new Date(item.pubDate),
         })
         try {
