@@ -9,6 +9,19 @@ const turndownService = new TurndownService({ headingStyle: 'atx' })
 // taskListItems
 turndownService.use(turndownPluginGfm.gfm)
 
+const footnoteRefRule = {
+    filter: (node) => node.parentNode.getAttribute('class') === 'FootnoteRef',
+    replacement: (content) => content.replace(/\\/g, '').replace('[note: ', '[^'),
+}
+
+const footnoteRule = {
+    filter: (node) => node.parentNode.parentNode.getAttribute('class') === 'Footnote',
+    replacement: (content) => content.replace(/\\/g, '').replace('[note: ', '[^') + ': ',
+}
+
+turndownService.addRule('FootnoteRef', footnoteRefRule)
+turndownService.addRule('Footnote', footnoteRule)
+
 const getRequest = async (url) => {
     try {
         const response = await got(url)
@@ -85,6 +98,9 @@ const htmlToMarkdown = (html, url) => {
 
     // Remove non-utf-8 characters
     markdown = markdown.replace(/\uFFFD/g, '')
+
+    // Add footnote formatting
+    markdown = `<style>.footnotes::before { content: "Footnotes:"; }</style>` + markdown
 
     // Add source url at the bottom
     markdown += `\n\n\nSource: [link](${url})`
