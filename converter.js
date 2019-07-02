@@ -34,8 +34,7 @@ const replaceHeaderClassesWithTags = ($, headerPrefix, maxLevel = 4, padLevel = 
     }
 }
 
-const getMarkdownFromUrl = async (url) => {
-    const html = await getRequest(url)
+const htmlToMarkdown = (html, url) => {
     let $ = cheerio.load(html)
     let content = $('.contentsOfFile').html()
     // fallbacks
@@ -105,7 +104,13 @@ const getMarkdownFromUrl = async (url) => {
     }
 }
 
+const getMarkdownFromUrl = async (url) => {
+    const html = await getRequest(url)
+    return htmlToMarkdown(html, url)
+}
+
 module.exports = {
     getRequest,
     getMarkdownFromUrl,
+    htmlToMarkdown,
 }
